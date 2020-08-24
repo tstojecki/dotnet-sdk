@@ -48,6 +48,12 @@ namespace DaprDemoActor
         }
 
         /// <inheritdoc/>
+        public async Task RunLongTask()
+        {
+            await Task.Delay(20000);
+        }
+
+        /// <inheritdoc/>
         public Task TestThrowException()
         {
             throw new NotImplementedException();

@@ -27,6 +27,12 @@ namespace IDemoActorInterface
         Task<MyData> GetData();
 
         /// <summary>
+        /// Method to simulate long running task inside an actor.
+        /// </summary>
+        /// <returns>A task that represents the asynchronous save operation.</returns>
+        Task RunLongTask();
+
+        /// <summary>
         /// A test method which throws exception.
         /// </summary>
         /// <returns>A task that represents the asynchronous save operation.</returns>

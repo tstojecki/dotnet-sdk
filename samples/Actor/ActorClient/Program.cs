@@ -30,66 +30,21 @@ namespace ActorClient
             };
 
             // Create an actor Id.
-            var actorId = new ActorId("abc");
+            var actorId1 = new ActorId("abc");
+            var actorId2 = new ActorId("def");
 
             // Make strongly typed Actor calls with Remoting.
             // DemoActor is the type registered with Dapr runtime in the service.
-            var proxy = ActorProxy.Create<IDemoActor>(actorId, "DemoActor");
+            var proxy1 = ActorProxy.Create<IDemoActor>(actorId1, "DemoActor");
+            var proxy2 = ActorProxy.Create<IDemoActor>(actorId2, "DemoActor");
 
-            Console.WriteLine("Making call using actor proxy to save data.");
-            await proxy.SaveData(data);
-            Console.WriteLine("Making call using actor proxy to get data.");
-            var receivedData = await proxy.GetData();
-            Console.WriteLine($"Received data is {receivedData}.");
+            Console.WriteLine("Making call using actor proxy 1 to long running task.");
+            await proxy1.RunLongTask();
 
-            // Making some more calls to test methods.
-            try
-            {
-                Console.WriteLine("Making calls to an actor method which has no argument and no return type.");
-                await proxy.TestNoArgumentNoReturnType();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"ERROR: Got exception while making call to method with No Argument & No Return Type. Exception: {ex}");
-            }
+            Console.WriteLine("Making call using actor proxy 2 to long running task.");
+            await proxy2.RunLongTask();
 
-            try
-            {
-                await proxy.TestThrowException();
-            }
-            catch (ActorMethodInvocationException ex)
-            {
-                if (ex.InnerException is NotImplementedException)
-                {
-                    Console.WriteLine($"Got Correct Exception from actor method invocation.");
-                }
-                else
-                {
-                    Console.WriteLine($"Got Incorrect Exception from actor method invocation. Exception {ex.InnerException}");
-                }
-            }
-
-            // Making calls without Remoting, this shows method invocation using InvokeAsync methods, the method name and its payload is provided as arguments to InvokeAsync methods.
-            Console.WriteLine("Making calls without Remoting.");
-            var nonRemotingProxy = ActorProxy.Create(actorId, "DemoActor");
-            await nonRemotingProxy.InvokeAsync("TestNoArgumentNoReturnType");
-            await nonRemotingProxy.InvokeAsync("SaveData", data);
-            var res = await nonRemotingProxy.InvokeAsync<MyData>("GetData");
-
-            Console.WriteLine("Registering the timer and reminder");
-            await proxy.RegisterTimer();
-            await proxy.RegisterReminder();
-            Console.WriteLine("Waiting so the timer and reminder can be triggered");
-            await Task.Delay(6000);
-
-            Console.WriteLine("Making call using actor proxy to get data after timer and reminder triggered");
-            receivedData = await proxy.GetData();
-            Console.WriteLine($"Received data is {receivedData}.");
-
-            Console.WriteLine("Deregistering timer. Timers would any way stop if the actor is deactivated as part of Dapr garbage collection.");
-            await proxy.UnregisterTimer();
-            Console.WriteLine("Deregistering reminder. Reminders are durable and would not stop until an explicit deregistration or the actor is deleted.");
-            await proxy.UnregisterReminder();
+            Console.WriteLine("Called actors 1 and 2");
         }
     }
 }
